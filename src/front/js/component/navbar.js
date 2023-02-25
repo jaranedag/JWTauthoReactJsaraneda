@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useContext,useState}  from "react";
+import { Context } from "../store/appContext";
 import { Link } from "react-router-dom";
 import '../../styles/home.css'
 
 export const Navbar = () => {
+	const {actions,store}=useContext(Context)
+	const [datauser,setDataUser] = useState(JSON.parse(localStorage.getItem("datauser") ))
+	console.log(datauser)
+
+	const [token,setToken] = useState(JSON.parse(localStorage.getItem("token") ))
+	const handleLogout = () =>{
+		setDataUser (localStorage.removeItem("datauser"))
+        setToken (localStorage.removeItem("token"))
+		alert("has cerrado sesion ")
+	}
 
 	return (
 		<div className="mb-0">
@@ -15,21 +26,8 @@ export const Navbar = () => {
 					</div>
 				</nav>
 				<ul className="navbar-nav me-auto mb-2 mb-lg-0 ">
-					<li className="nav-item">
-						<Link to="/recetas" className="text-decoration-none">
-							<a className="nav-link active navbarFontColor" aria-current="page" href="#"></a>
-						</Link>
-					</li>
-					<li className="nav-item">
-					<Link to="/entrenamiento" className="text-decoration-none">
-						<a className="nav-link navbarFontColor" href="#"></a>
-						</Link>
-					</li>
-					{/*<li className="nav-item">
-						<Link to="/tusemana" className="text-decoration-none">
-							<a className="nav-link navbarFontColor" href="#">Tu semana</a>
-						</Link>
-	                </li>*/}
+					
+				
 				</ul>
 				{/* login icon */}
 				<li className="navbar-nav px-1">
@@ -41,7 +39,7 @@ export const Navbar = () => {
 
 				<li className="navbar-nav pe-3 ps-1">
 					<Link to="/login" className="text-decoration-none">
-						<a className="nav-link  navbarFontColor" href="#">Login</a>
+						<a className="nav-link  navbarFontColor" href="#">{datauser ? datauser?.info_user.email : "Login"}</a>
 					</Link>
 					<Link to="/signup" className="text-decoration-none">
 						<a className="nav-link  navbarFontColor" href="#">Signup</a>
@@ -50,7 +48,7 @@ export const Navbar = () => {
 				{/* logout icon */}
 
 
-				<li className="navbar-nav px-3" >
+				<li className="navbar-nav px-3"onClick={()=>{handleLogout()}} >
 
 
 					<Link to="/" className="text-decoration-none">

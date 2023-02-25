@@ -18,6 +18,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 ENV = os.getenv("FLASK_ENV")
 static_file_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../public/')
 app = Flask(__name__)
+jwt = JWTManager(app)
 app.url_map.strict_slashes = False
 
 # database condiguration
@@ -113,7 +114,7 @@ def signup():
                     "token": "",
                     "status":400}
         
-        user = User()            
+        user = User(email=email,password=password)            
         user.email = body["email"]
         user.password = body["password"]          
         db.session.add(user)
@@ -137,18 +138,40 @@ def token_validation():
         "msg":"token valido"
     })
 
-@app.route('/user', methods=['POST'])
-@jwt_required()
-def get_user():
-     body = request.get_json()
-     all = User.query.filter_by( rol=body['rol'])
+@app.route('/user', methods=['GET','POST'])
+def handle_hello():
+    #cuando es un get conseguiremos todos los usuarios 
+    if request.method =='GET':
+        all_people = User.query.all()
+        all_people = list(map(lambda x: x.serialize(), all_people))
     
-     all = list(map(lambda user: user.serialize(), all))
-
-     return jsonify({
-         "user": all
-     }), 200
-
+        return jsonify(all_people), 200
+    
+    else:
+        body = request.get_json() # obtener el request body de la solicitud
+        if body is None:
+            return "The request body is null", 400
+        if 'email' not in body:
+            return 'Especificar email', 400
+        if 'password' not in body:
+            return 'Especificar password',400
+        #estoy consultando si existe alguien con el email que mande en la api y consigo la primera coincidencia
+        onePeople = User.query.filter_by(email=body["email"]).first()
+        if onePeople:
+            if (onePeople.password == body["password"] ):
+                #CUANDO VALIDAMOS LA PASSWORD CREAREMOS EL TOKEN
+                expira = datetime.timedelta(minutes=2)
+                access_token = create_access_token(identity=onePeople.email, expires_delta=expira)
+                data = {
+                    "info_user": onePeople.serialize(),
+                    "token": access_token,
+                    "expires": expira.total_seconds()
+                }
+                return(jsonify(data))
+            else:
+                return(jsonify({"mensaje":False}))
+        else:
+            return(jsonify({"mensaje":"mail no se encuentra registrado"})) 
 
 @app.route('/signup', methods=['GET'])
 def get_user_register():
@@ -161,8 +184,11 @@ def get_user_register():
     return jsonify({
         "user": all_Register
     }), 200                        
-
-
+@app.route("/private",methods=["GET"])
+@jwt_required()
+def privada():
+    identidad = get_jwt_identity()
+    return identidad
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3001))

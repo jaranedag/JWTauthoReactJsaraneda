@@ -1,10 +1,23 @@
-body{
-    background-color: rgb(147, 167, 235);
+body {
+  background-color: rgb(114, 152, 155);
+  color: white;
 }
-.navbarColor{
-    background: #f7bde8 !important;;
+.navbarColor {
+  background: #cec0ca !important;
+  color: white;
 }
-.footerColor{
-    background: #f7bde8 !important;;
-    font-family: 'Pompiere', 'normal';
+.footerColor {
+  background: #cec0ca !important;
+  font-family: "Pompiere", "normal";
+}
+.contenedor-principal{
+    margin-top: 50px;
+}
+.carta-contenedora{
+    margin: 0 auto;
+    width: 1054px;
+    height: 595px;
+    background: #a8d8ee;
+    border: 1px solid #f0cff8;
+    border-radius: 15px;  
 }
